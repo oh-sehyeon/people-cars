@@ -2,59 +2,96 @@ import find from 'lodash.find'
 import remove from 'lodash.remove'
 import { v4 as uuidv4 } from 'uuid';
 
-const personsDataArray = [
+const people = [
   {
     id: '1',
-    firstName: 'Se Hyeon',
-    lastName: 'Oh',
-    cars: [
-      {
-        id: '1',
-        year: 2020,
-        make: 'Toyota',
-        model: 'Camry',
-        price: 25000,
-        personID: '1'
-      },
-      {
-        id: '2',
-        year: 2018,
-        make: 'Honda',
-        model: 'Accord',
-        price: 22000,
-        personID: '1'
-      }
-    ]
+    firstName: 'Bill',
+    lastName: 'Gates'
   },
   {
     id: '2',
-    firstName: 'Harry',
-    lastName: 'Potter',
-    cars: [
-      {
-        id: '4',
-        year: 2018,
-        make: 'Rolls Royce',
-        model: 'Phantom',
-        price: 500000000,
-        personID: '2'
-      },
-    ]
+    firstName: 'Steve',
+    lastName: 'Jobs'
   },
   {
     id: '3',
-    firstName: 'John',
-    lastName: 'Doe',
-    cars: [
-      {
-        id: '3',
-        year: 2019,
-        make: 'Ford',
-        model: 'Mustang',
-        price: 35000,
-        personID: '3'
-      }
-    ]
+    firstName: 'Linux',
+    lastName: 'Torvalds'
+  }
+]
+
+const cars = [
+  {
+    id: '1',
+    year: '2019',
+    make: 'Toyota',
+    model: 'Corolla',
+    price: '40000',
+    personID: '1'
+  },
+  {
+    id: '2',
+    year: '2018',
+    make: 'Lexus',
+    model: 'LX 600',
+    price: '13000',
+    personID: '1'
+  },
+  {
+    id: '3',
+    year: '2017',
+    make: 'Honda',
+    model: 'Civic',
+    price: '20000',
+    personID: '1'
+  },
+  {
+    id: '4',
+    year: '2019',
+    make: 'Acura ',
+    model: 'MDX',
+    price: '60000',
+    personID: '2'
+  },
+  {
+    id: '5',
+    year: '2018',
+    make: 'Ford',
+    model: 'Focus',
+    price: '35000',
+    personID: '2'
+  },
+  {
+    id: '6',
+    year: '2017',
+    make: 'Honda',
+    model: 'Pilot',
+    price: '45000',
+    personID: '2'
+  },
+  {
+    id: '7',
+    year: '2019',
+    make: 'Volkswagen',
+    model: 'Golf',
+    price: '40000',
+    personID: '3'
+  },
+  {
+    id: '8',
+    year: '2018',
+    make: 'Kia',
+    model: 'Sorento',
+    price: '45000',
+    personID: '3'
+  },
+  {
+    id: '9',
+    year: '2017',
+    make: 'Volvo',
+    model: 'XC40',
+    price: '55000',
+    personID: '3'
   }
 ]
 
@@ -92,14 +129,33 @@ const typeDefs = `
   }
 `
 
+const pplCarDataArray = people.map(person => {
+  const filteredCars = cars.filter(car => car.personID === person.id)
+    .map(car => ({
+      id: car.id,
+      year: parseInt(car.year),
+      make: car.make,
+      model: car.model,
+      price: parseInt(car.price),
+      personID: car.personID
+    }));
+
+  return {
+    id: person.id,
+    firstName: person.firstName,
+    lastName: person.lastName,
+    cars: filteredCars
+  };
+});
+
 const resolvers = {
   Query: {
-    persons: () => personsDataArray,
+    persons: () => pplCarDataArray,
     person: (parent, args) => {
-      return find(personsDataArray, { id: args.id })
+      return find(pplCarDataArray, { id: args.id })
     },
     getPersonCars: (parent, { personID }) => {
-      const person = find(personsDataArray, { id: personID });
+      const person = find(pplCarDataArray, { id: personID });
       if (!person) {
         throw new Error(`Couldn't find person with id ${personID}`);
       }
@@ -114,7 +170,7 @@ const resolvers = {
       return cars;
     },
     personWithCars: (parent, { id }) => {
-      const person = find(personsDataArray, { id });
+      const person = find(pplCarDataArray, { id });
       if (!person) {
         throw new Error(`Couldn't find person with id ${id}`);
       }
@@ -131,14 +187,14 @@ const resolvers = {
         cars: [],
       }
 
-      personsDataArray.push(newPerson)
+      pplCarDataArray.push(newPerson)
 
       return newPerson
     },
     addCar: (root, args) => {
       const { year, make, model, price, id, personID } = args;
 
-      const person = find(personsDataArray, { id: personID });
+      const person = find(pplCarDataArray, { id: personID });
       if (!person) {
         throw new Error(`Couldn't find person with id ${personID}`);
       }
@@ -158,7 +214,7 @@ const resolvers = {
     },
     updateCar: (root, args) => {
       const { id, year, make, model, price } = args;
-      const person = personsDataArray.find((person) => person.cars.some((car) => car.id === id));
+      const person = pplCarDataArray.find((person) => person.cars.some((car) => car.id === id));
       if (!person) {
         throw new Error(`Couldn't find car with id ${id}`);
       }
@@ -172,12 +228,12 @@ const resolvers = {
       return car;
     },
     removePerson: (root, args) => {
-      const removedPerson = find(personsDataArray, { id: args.id })
+      const removedPerson = find(pplCarDataArray, { id: args.id })
       if (!removedPerson) {
         throw new Error(`Couldn't find person with id ${args.id}`)
       }
 
-      remove(personsDataArray, c => {
+      remove(pplCarDataArray, c => {
         return c.id === removedPerson.id
       })
 
@@ -186,7 +242,7 @@ const resolvers = {
       removeCar: (root, args) => {
         const { id, personID } = args;
     
-        const person = find(personsDataArray, { id: personID });
+        const person = find(pplCarDataArray, { id: personID });
         if (!person) {
           throw new Error(`Couldn't find person with id ${personID}`);
         }
@@ -204,4 +260,4 @@ const resolvers = {
   }
 }
 
-export { typeDefs, resolvers }
+export { typeDefs, resolvers, pplCarDataArray }
